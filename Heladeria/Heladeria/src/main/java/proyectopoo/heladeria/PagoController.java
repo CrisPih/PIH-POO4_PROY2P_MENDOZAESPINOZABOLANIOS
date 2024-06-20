@@ -35,7 +35,7 @@ import static proyectopoo.heladeria.ResumenController.totalResumen;
  *
  * @author Guillermo Mendoza
  */
-public class PagoController implements Initializable {
+public class PagoController implements Initializable, ServicioPago {
     /**
      * Variable del IVA estatico para que sea posible acceder a ella desde otras  clases dle proyecto
      */
@@ -56,6 +56,7 @@ public class PagoController implements Initializable {
     /**
      * Initializes the controller class.
      */
+    private ToggleGroup TipoPago;
     public static TipoPago clasep;
     @FXML
     private VBox vbpago;
@@ -98,7 +99,21 @@ public class PagoController implements Initializable {
     TextField number=new TextField();
     TextField date=new TextField();
     TextField cv=new TextField();
+    
+    private TextField txtNombreTarjeta;
+    private TextField txtNumeroTarjeta;
+    private TextField txtFechaTarjeta;
+    private TextField txtCVVTarjeta;
 
+       public PagoController() {
+        // Inicialización de los campos de texto simulados
+        txtNombreTarjeta = new TextField();
+        txtNumeroTarjeta = new TextField();
+        txtFechaTarjeta = new TextField();
+        txtCVVTarjeta = new TextField();
+    }
+    
+    
     /**
      * 
      * @param url Localizacion del FXML
@@ -242,5 +257,71 @@ public class PagoController implements Initializable {
      txts.setPadding(new Insets(25,0,0,0));
      txts.getChildren().addAll(name,number,date,cv);
      hbtipopago.getChildren().addAll(infoT,txts);
+    }
+    
+    
+    public void ingresarDatosTarjeta(String nombre, String numero, String fecha, String cvv) {
+    if (datosTarjetaValidos()) {
+        txtNombreTarjeta.setText(nombre);
+        txtNumeroTarjeta.setText(numero);
+        txtFechaTarjeta.setText(fecha);
+        txtCVVTarjeta.setText(cvv);
+    }
+   }
+    
+ 
+
+    // Método para verificar si los datos de la tarjeta son válidos
+    public boolean datosTarjetaValidos() {
+        // Aquí simulamos una validación básica
+        String nombre = "Nombre";  // Ejemplo de datos válidos
+        String numero = "Número";  // Ejemplo de datos válidos
+        String fecha = "Fecha";    // Ejemplo de datos válidos
+        String cvv = "CVV";        // Ejemplo de datos válidos
+        
+        // Verificación básica, podrías implementar la lógica real de validación aquí
+        return !nombre.isEmpty() && !numero.isEmpty() && !fecha.isEmpty() && !cvv.isEmpty();
+    }
+    
+      public void procesarPago() {
+        RadioButton seleccionado = (RadioButton) TipoPago.getSelectedToggle();
+        if (seleccionado != null && seleccionado.getText().equals("Tarjeta de Crédito")) {
+            if (datosTarjetaValidos()) {
+                System.out.println("Procesando pago con tarjeta...");
+                ingresarDatosTarjeta("Nombre", "Número", "Fecha", "CVV");
+            } else {
+                System.out.println("Datos de tarjeta incompletos");
+            }
+        } else {
+            // Lógica específica para procesar pago en efectivo
+            System.out.println("Procesando pago en efectivo...");
+        }
+    }
+      
+      
+      
+    
+    @Override
+    public void confirmarPago() {
+        RadioButton seleccionado = (RadioButton) TipoPago.getSelectedToggle();
+        if (seleccionado != null && seleccionado.getText().equals("Tarjeta de Crédito")) {
+            if (datosTarjetaValidos()) {
+                ingresarDatosTarjeta("Nombre", "Número", "Fecha", "CVV");
+     
+                System.out.println("Procesando pago con tarjeta...");
+            } else {
+                System.out.println("Datos de tarjeta incompletos");
+            }
+        } else {
+            System.out.println("Procesando pago en efectivo...");
+        }
+    }
+    
+    
+
+    @Override
+    public void cancelarPago() {
+   
+        System.out.println("Cancelando pago...");
     }
 }

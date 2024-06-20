@@ -1,1 +1,2 @@
- 9999, nahinespinoza, 7.8
+ 9999, Tomagochito, 6.8
+9998, Tomagochito, 4.5

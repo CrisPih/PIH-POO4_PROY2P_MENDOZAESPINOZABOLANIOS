@@ -41,19 +41,19 @@ public class Pedido implements Serializable, Pagable {
      * ID de pago usado en el método generar transaccion
      */
     private int numPago = 9999;
-    
+    private TipodePago tipoPago;
     /**
      * 
      * @param base1 Base de helado escogida por el cliente
      * @param listasabores Lista de sabores que el cliente escogió para su helado
      * @param listatopping Lista de toppings que el cliente eligió para su helado
      */
-    public Pedido(Base base1, ArrayList<Sabor> listasabores, ArrayList<Topping> listatopping) {
+    public Pedido(Base base1, ArrayList<Sabor> listasabores, ArrayList<Topping> listatopping, TipodePago tipoPago) {
         this.base1 = base1;
         this.listasabores = listasabores;
         this.listatopping = listatopping;
+        this.tipoPago = tipoPago;
     }
-
     /**
      * 
      * @return Base del helado escogida por el cliente
@@ -82,6 +82,12 @@ public class Pedido implements Serializable, Pagable {
     public void setListasabores(ArrayList<Sabor> listasabores) {
         this.listasabores = listasabores;
     }
+
+    public TipodePago getTipoPago() {
+        return tipoPago;
+    }
+    
+    
     /**
      * 
      * @return Lista de los toppings escogidos por el cliente 
@@ -111,38 +117,33 @@ public class Pedido implements Serializable, Pagable {
      * informacion del pago en un archivo pago.txt
      */
     @Override
+ 
     public void generarTransaccion() {
-        Date fecha=new Date();
+        Date fecha = new Date();
         SimpleDateFormat sd = new SimpleDateFormat("dd-MM-yyyy");
-        double totalPago=0;
-        if (PagoController.clasep.equals(TipoPago.C)){
-            totalPago=PagoController.totalTarjeta;
-        }
-        else{
-            totalPago=PagoController.totalIVA;
-        }
-        try(BufferedWriter bf= new BufferedWriter(new FileWriter(ManejoArchivos.rutaArchivos+"pagos.txt",true))){
-            String line=numPago+","+VentanaToppingsController.numPedido+","+VentanaInicioController.clienteActual.getUsuario()+
-                    ","+totalPago+","+sd.format(fecha)+","+String.valueOf(PagoController.clasep);
-            bf.write(line+"\n");
+       double totalPago = App.pedidoactual.getTipoPago().calcularTotalPago(App.pedidoactual.getBase1().getPrecioBase());
+        try (BufferedWriter bf = new BufferedWriter(new FileWriter(ManejoArchivos.rutaArchivos + "pagos.txt", true))) {
+            String line = numPago + "," + VentanaToppingsController.numPedido + "," + VentanaInicioController.clienteActual.getUsuario()
+                    + "," + totalPago + "," + sd.format(fecha) + "," + tipoPago.getClass().getSimpleName();
+            bf.write(line + "\n");
             numPago--;
-        }catch(IOException ioe){
+        } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }
-        
     }
-    /**
-     * 
-     * @param objeto Objeto a serializar
-     * @param nombreArchivo Nombre que se le pondrá al objeto serializado
-     */
-    public static void serializarPedido(Pedido objeto, String nombreArchivo) {
+        
+        public static void serializarPedido(Pedido objeto, String nombreArchivo) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ManejoArchivos.rutaArchivos + nombreArchivo))) {
             oos.writeObject(objeto);
             System.out.println("¡El objeto se serializó con éxito!");
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-    }// se cierra el metodo
+    }
+    /**
+     * 
+     * @param objeto Objeto a serializar
+     * @param nombreArchivo Nombre que se le pondrá al objeto serializado
+     */
 
 }

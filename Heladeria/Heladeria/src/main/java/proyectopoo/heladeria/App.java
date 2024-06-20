@@ -20,7 +20,7 @@ public class App extends Application {
         /**
          * Es el pedido actual, con la capacidad de ser accedido dedsde otras clases
          */
-        public static Pedido pedidoactual = new Pedido(null,null,null);
+        public static Pedido pedidoactual = new Pedido(null,null,null, null);
     
 
      /**

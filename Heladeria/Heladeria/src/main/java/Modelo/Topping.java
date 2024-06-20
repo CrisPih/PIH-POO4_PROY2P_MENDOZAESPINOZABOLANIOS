@@ -70,7 +70,6 @@ public class Topping implements Serializable {
  */
     public void setPrecioTopping(double precioTopping) {
         this.precioTopping = precioTopping;
-    }
-    
+    }   
     
 }

@@ -71,7 +71,4 @@ public class VentanaPedidosActualizadosController implements Initializable {
         running = false;
     }
     
-
-
-    
 }

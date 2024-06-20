@@ -4,6 +4,8 @@
  */
 package proyectopoo.heladeria;
 
+import proyectopoo.heladeria.SaborService;
+import proyectopoo.heladeria.PedidoService;
 import Modelo.IncompleteStageException;
 import Modelo.Local;
 import Modelo.ManejoArchivos;
@@ -38,7 +40,9 @@ import javafx.scene.layout.VBox;
  * @author Nahin
  */
 public class VentanaSaboresController implements Initializable {
-
+    private final SaborService saborService;
+    private PedidoService pedidoService;
+ 
     @FXML
     private VBox VBox1Sabores;
 
@@ -64,22 +68,19 @@ public class VentanaSaboresController implements Initializable {
     private Label totalsabores;
     @FXML
     private ImageView imgvsabor;
-    /**
-     * Varianlo del total en la ventana sabores
-     */
+
     public static double totalpago;
-    /**
-     * Lista de sabores
-     */
+ 
     ArrayList<Sabor> listasabores = new ArrayList<>();
-    /**
-     * Varible estatica del sabor 1
-     */
+
     public static Sabor sabor1;
-    /**
-     * Variable estatica del sabor 2
-     */
+
     public static Sabor sabor2;
+    
+    public VentanaSaboresController(SaborService saborService, PedidoService pedidoService) {
+       this.saborService = saborService;
+       this.pedidoService = pedidoService;
+    }
 
     /**
      * Metodo para inicializar el controller
@@ -107,11 +108,7 @@ public class VentanaSaboresController implements Initializable {
      * sabores
      */
     public void cargarsabores() {
-        ArrayList<Sabor> listalineas = ManejoArchivos.listaSabores();
-                for (Sabor sabores:listalineas){
-                Sabor sabor = new Sabor(sabores.getNombreSabor(), sabores.getPrecioSabor());
-                listasabores.add(sabor);
-            }
+        listasabores.addAll(saborService.obtenerSabores());
     }
 
     /**
@@ -159,13 +156,13 @@ public class VentanaSaboresController implements Initializable {
      * @param event Evento que se activara cuando clicken el boton
      */
     @FXML
+
     private void botoncontinuar(ActionEvent event) {
         try {
             boolean alMenosUnoSeleccionado = (cbsabor1.getValue() != null || cbsabor2.getValue() != null);
             if (alMenosUnoSeleccionado) {
-                // Obtener los sabores seleccionados
-                sabor1 = cbsabor1.getValue();
-                sabor2 = cbsabor2.getValue();
+                Sabor sabor1 = cbsabor1.getValue();
+                Sabor sabor2 = cbsabor2.getValue();
 
                 ArrayList<Sabor> selecsabores = new ArrayList<>();
                 if (sabor1 != null) {
@@ -175,13 +172,14 @@ public class VentanaSaboresController implements Initializable {
                     selecsabores.add(sabor2);
                 }
 
-                // Continuar con la siguiente ventana (si es necesario)
                 App.pedidoactual.setListasabores(selecsabores);
+                // Actualiza el pedido actual utilizando el servicio de pedidos
+                pedidoService.actualizarPedido(App.pedidoactual);
 
                 try {
                     App.setRoot("VentanaToppings");
                 } catch (IOException ioe) {
-                    System.out.println("Ocurrió un error al intentar cambiar a la escena de sabores");
+                    System.out.println("Ocurrió un error al intentar cambiar a la escena de toppings");
                 }
             } else {
                 System.out.println("Ningún ComboBox tiene algo seleccionado.");
@@ -195,5 +193,4 @@ public class VentanaSaboresController implements Initializable {
             alert.showAndWait();
         }
     }
-
 }

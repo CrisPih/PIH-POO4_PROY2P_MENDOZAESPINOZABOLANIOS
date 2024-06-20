@@ -4,24 +4,10 @@
  */
 package proyectopoo.heladeria;
 
-import Modelo.ManejoArchivos;
-import Modelo.Pedido;
-import Modelo.Sabor;
 import Modelo.Topping;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -29,26 +15,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import static proyectopoo.heladeria.VentanaSaboresController.sabor1;
-import static proyectopoo.heladeria.VentanaSaboresController.sabor2;
+import proyectopoo.heladeria.IToppingService;
+import proyectopoo.heladeria.IImageLoader;
 
-/**
- * FXML Controller class
- *
- * @author Nahim
- */
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+
 public class VentanaToppingsController implements Initializable {
 
-    /**
-     * Variable estatica que corresponde al ID del pedido, permitiendo acceder a
-     * el desde otras clases del proyecto
-     */
     public static int numPedido = 9999;
-    /**
-     * Variable estatica del total sin adicionar del IVA, permitiendo acceder a
-     * ella desde otras clases del proyecto
-     */
-    public static double total=VentanaSaboresController.totalpago;
+    public static double total = VentanaSaboresController.totalpago;
 
     @FXML
     private VBox root_toppings;
@@ -68,74 +46,41 @@ public class VentanaToppingsController implements Initializable {
     private ImageView imgvtoppings;
     @FXML
     private ImageView imgvgif;
-    /**
-     * Lista de toppings cargados
-     */
-    ArrayList<Topping> listatoppings = new ArrayList<Topping>();
-    /**
-     * Lista de toppings seleccionados
-     */
-    ArrayList<Topping> toppingselec = new ArrayList<Topping>();
 
-    /**
-     *
-     * @param url localizacion del FXML
-     * @param rb recursos del controlador
-     */
+    private ArrayList<Topping> listatoppings = new ArrayList<>();
+    private ArrayList<Topping> toppingselec = new ArrayList<>();
+
+    private IToppingService toppingService;
+    private IImageLoader imageLoader;
+
+    public VentanaToppingsController(IToppingService toppingService, IImageLoader imageLoader) {
+        this.toppingService = toppingService;
+        this.imageLoader = imageLoader;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-        total=VentanaSaboresController.totalpago;
-        try (FileInputStream f = new FileInputStream(ManejoArchivos.rutaImagenes + "bases3.png")) {
-            Image i = new Image(f);
-            imgvtoppings.setImage(i);
-        } catch (IOException i) {
-            System.out.println("Error al cargar imagen");
-        }
-        try (FileInputStream g = new FileInputStream(ManejoArchivos.rutaImagenes + "L.gif")) {
-            Image im = new Image(g);
-            imgvgif.setImage(im);
-        } catch (IOException i) {
-            System.out.println("Error al cargar imagen");
+        total = VentanaSaboresController.totalpago;
+        try {
+            imgvtoppings.setImage(imageLoader.loadImage("rutaImagenes/bases3.png"));
+            imgvgif.setImage(imageLoader.loadImage("rutaImagenes/L.gif"));
+        } catch (IOException e) {
+            System.out.println("Error al cargar imagen: " + e.getMessage());
         }
         totaltoppings.setText(String.valueOf(total));
-        cargartoppings();
-        crearcheckbox();
-
+        listatoppings = toppingService.loadToppings();
+        crearCheckbox();
     }
 
-    /**
-     * Carga los toppings del archivo de toppings.
-     */
-    public void cargartoppings() {
-         ArrayList<Topping> listalineas = ManejoArchivos.listaToppings();
-                for (Topping toppings:listalineas){
-                Topping topping = new Topping(toppings.getNombreTopping(), toppings.getPrecioTopping());
-                listatoppings.add(topping);
-            }
-    
-    }
-
-    /**
-     * Crea los checkbox de cada topping en la ventana de toppings.
-     */
-    public void crearcheckbox() {
+    private void crearCheckbox() {
         for (Topping tp : listatoppings) {
             CheckBox chb = new CheckBox(tp.toString());
             VBoxtoppings.getChildren().addAll(chb);
-            chb.setOnAction(event -> recuperartoppings(chb, tp));
+            chb.setOnAction(event -> recuperarToppings(chb, tp));
         }
     }
 
-    /**
-     *
-     * @param ch variable de cada checkbox de los toppings, se usa para validar
-     * si el checkbox esta seleccionado o no.
-     * @param tp es el topping al que pertenece al checkbox, si el checkbox se
-     * encuentra seleccionado este se guarda en una lista de toppings
-     * seleccionados
-     */
-    public void recuperartoppings(CheckBox ch, Topping tp) {
+    private void recuperarToppings(CheckBox ch, Topping tp) {
         if (ch.isSelected()) {
             total += tp.getPrecioTopping();
             toppingselec.add(tp);
@@ -146,22 +91,13 @@ public class VentanaToppingsController implements Initializable {
         totaltoppings.setText("$ " + total);
     }
 
-    /**
-     * Metodo del boton continuar en la ventana topping, se utiliza para generar
-     * el pedido del cliente y guardarlo en un archivo, para luego cambiar a la
-     * ventana pago
-     * @param e Evento del boton continuar
-     */
     @FXML
-    public void botonContinuar(ActionEvent e) {
-        //Se debe generar pedido y guardar en pedidotxt
+    private void botonContinuar(ActionEvent e) {
         App.pedidoactual.setListatopping(toppingselec);
         try {
             App.setRoot("Resumen");
         } catch (IOException ioe) {
             System.out.println("No se ha podido cambiar la ventana");
         }
-        
     }
-
 }
